@@ -16,6 +16,7 @@
             <el-form-item>
                 <el-button type="primary" @click="submitForm(ruleFormRef)">登录</el-button>
                 <el-button @click="resetForm(ruleFormRef)">重置</el-button>
+                <a class="register"  href="/register">点我注册</a>
             </el-form-item>
         </el-form>
     </div>
@@ -24,18 +25,14 @@
 <script setup lang="ts">
 import { onMounted, reactive, ref } from 'vue'
 import type { FormInstance, FormRules } from 'element-plus'
-
+import { useRouter } from 'vue-router'
+import axios from 'axios'
+const router = useRouter()
 const ruleFormRef = ref<FormInstance>()
 
 const validateUsername = (rule: any, value: any, callback: any) => {
-    if (!value) {
-        callback(new Error('用户名不能为空！'))
-    } else {
-        if (ruleForm.username !== '') {
-            if (!ruleFormRef.value) return
-            ruleFormRef.value.validateField('checkUser', () => null)
-        }
-        callback()
+    if (!ruleForm.username) {
+        return callback(new Error('用户名不能为空！'))
     }
 }
 onMounted(() => {
@@ -43,10 +40,8 @@ onMounted(() => {
     console.log('mounted')
 })
 const validatePassword = (rule: any, value: any, callback: any) => {
-    if (!value) {
-        callback(new Error('密码不能为空！'))
-    } else {
-        callback()
+    if (!ruleForm.password) {
+       return callback(new Error('密码不能为空！'))
     }
 }
 
@@ -61,22 +56,23 @@ const rules = reactive<FormRules>({
 })
 
 const submitForm = (formEl: FormInstance | undefined) => {
-    if (!formEl) return
-    formEl.validate((valid: any) => {
-        if (valid) {
-            console.log(ruleForm)
-            console.log('submit!')
-        } else {
-            console.log('error submit!')
-            return false
+    axios.post('/users/login', {
+        username: ruleForm.username,
+        password: ruleForm.password
+    }).then(({ data }) => {
+        if (data.code == '0000') {
+            let token = data.data.token
+            localStorage.setItem('token', token)
+            router.push('/home')
         }
+    }).catch((err) => {
+        console.log(err)
     })
 }
 
 const resetForm = (formEl: FormInstance | undefined) => {
-    ruleFormRef.value.resetFields()
     formEl.resetFields()
-    // console.log(formEl === )
+    ruleForm.password = ruleForm.username= ''
 }
 </script>
 

@@ -1,7 +1,5 @@
 <template>
-    <div>
-        <router-view></router-view>
-    </div>
+    <h1>注册</h1>
 </template>
 
 <script setup lang="ts">
